@@ -10,6 +10,7 @@ RUN npm ci --omit=dev
 FROM node:24-bookworm-slim
 WORKDIR /app
 ENV NODE_ENV=production
+ENV GIT_SSL_CAINFO=/etc/ssl/certs/ca-certificates.crt
 RUN apt-get update \
     && apt-get install -y --no-install-recommends ca-certificates git \
     && rm -rf /var/lib/apt/lists/*

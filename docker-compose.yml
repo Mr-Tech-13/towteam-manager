@@ -17,6 +17,7 @@ services:
       GIT_CONFIG_COUNT: "1"
       GIT_CONFIG_KEY_0: safe.directory
       GIT_CONFIG_VALUE_0: /app
+      GIT_SSL_CAINFO: /etc/ssl/certs/ca-certificates.crt
     volumes:
       - .:/app
       - towteam_manager_node_modules:/app/node_modules
