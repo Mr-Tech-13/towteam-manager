@@ -11,53 +11,54 @@
 <body>
   <main id="login" class="login-shell">
     <form id="login-form" class="panel login-panel">
-      <div class="brand"><span></span><div><h1>TowTeam Manager</h1><p>Node control plane <span class="version-label"></span></p></div></div>
-      <label>Username<input name="username" autocomplete="username" required></label>
-      <label>Password<input name="password" type="password" autocomplete="current-password" required></label>
-      <button class="primary" type="submit">Sign in</button>
-      <p class="login-hint">First run: the generated password is saved in <code>data/initial-admin-password.txt</code>.</p>
+      <div class="brand"><span></span><div><h1>TowTeam Manager</h1><p><span data-i18n="nodeControlPlane">Node control plane</span> <span class="version-label"></span></p></div></div>
+      <label><span data-i18n="language">Language</span><select class="language-selector" aria-label="Language"><option value="en">English</option><option value="es">Español</option><option value="pl">Polski</option></select></label>
+      <label><span data-i18n="username">Username</span><input name="username" autocomplete="username" required></label>
+      <label><span data-i18n="password">Password</span><input name="password" type="password" autocomplete="current-password" required></label>
+      <button class="primary" type="submit" data-i18n="signIn">Sign in</button>
+      <p class="login-hint"><span data-i18n="firstRunHint">First run: the generated password is saved in</span> <code>data/initial-admin-password.txt</code>.</p>
       <p id="login-error" class="error"></p>
     </form>
   </main>
   <div id="app" hidden>
-    <header><div class="brand"><span></span><div><h1 id="manager-name">TowTeam Manager</h1><p>Managed nodes <span class="version-label"></span></p></div></div><div class="header-actions"><button id="bulk-update">Update all nodes</button><button id="refresh-all">Refresh page</button><button id="logout">Sign out</button></div></header>
-    <nav><button class="tab active" data-view="nodes">Nodes</button><button class="tab" data-view="audit">Audit</button><button class="tab" data-view="manager">Manager</button></nav>
+    <header><div class="brand"><span></span><div><h1 id="manager-name">TowTeam Manager</h1><p><span data-i18n="managedNodes">Managed nodes</span> <span class="version-label"></span></p></div></div><div class="header-actions"><select class="language-selector compact" aria-label="Language"><option value="en">English</option><option value="es">Español</option><option value="pl">Polski</option></select><button id="bulk-update" data-i18n="updateAllNodes">Update all nodes</button><button id="refresh-all" data-i18n="refreshPage">Refresh page</button><button id="logout" data-i18n="signOut">Sign out</button></div></header>
+    <nav><button class="tab active" data-view="nodes" data-i18n="nodes">Nodes</button><button class="tab" data-view="audit" data-i18n="audit">Audit</button><button class="tab" data-view="manager" data-i18n="manager">Manager</button></nav>
     <main class="content">
       <section id="nodes-view">
-        <div class="section-heading"><div><h2>Nodes</h2><p>Enroll and operate independent TowTeam stations.</p></div><button id="show-enroll" class="primary">+ Add node</button></div>
-        <div class="node-search-bar"><label>Search nodes<input id="node-search" type="search" placeholder="Name, URL, UUID, version, channel, or status" autocomplete="off"></label><label>Per page<select id="node-page-size"><option>10</option><option selected>25</option><option>50</option><option>100</option></select></label></div>
+        <div class="section-heading"><div><h2 data-i18n="nodes">Nodes</h2><p data-i18n="nodesDescription">Enroll and operate independent TowTeam stations.</p></div><button id="show-enroll" class="primary" data-i18n="addNode">+ Add node</button></div>
+        <div class="node-search-bar"><label><span data-i18n="searchNodes">Search nodes</span><input id="node-search" type="search" placeholder="Name, URL, UUID, version, channel, or status" data-i18n-placeholder="searchPlaceholder" autocomplete="off"></label><label><span data-i18n="perPage">Per page</span><select id="node-page-size"><option>10</option><option selected>25</option><option>50</option><option>100</option></select></label></div>
         <div id="bulk-progress" class="panel bulk-progress" hidden></div>
         <div id="node-grid" class="node-grid"></div>
-        <div id="empty" class="panel empty" hidden>No nodes enrolled yet.</div>
-        <div class="pager"><button id="node-prev">Previous</button><span id="node-page"></span><button id="node-next">Next</button></div>
+        <div id="empty" class="panel empty" hidden data-i18n="noNodes">No nodes enrolled yet.</div>
+        <div class="pager"><button id="node-prev" data-i18n="previous">Previous</button><span id="node-page"></span><button id="node-next" data-i18n="next">Next</button></div>
       </section>
       <section id="audit-view" hidden>
-        <div class="section-heading"><div><h2>Management audit</h2><p>Enrollment, health, and command activity.</p></div><select id="audit-size"><option>10</option><option selected>25</option><option>50</option><option>100</option></select></div>
-        <div class="panel table-wrap"><table><thead><tr><th>Time</th><th>User</th><th>Node</th><th>Action</th><th>Details</th></tr></thead><tbody id="audit-body"></tbody></table></div>
-        <div class="pager"><button id="audit-prev">Previous</button><span id="audit-page"></span><button id="audit-next">Next</button></div>
+        <div class="section-heading"><div><h2 data-i18n="managementAudit">Management audit</h2><p data-i18n="auditDescription">Enrollment, health, and command activity.</p></div><select id="audit-size"><option>10</option><option selected>25</option><option>50</option><option>100</option></select></div>
+        <div class="panel table-wrap"><table><thead><tr><th data-i18n="time">Time</th><th data-i18n="user">User</th><th data-i18n="node">Node</th><th data-i18n="action">Action</th><th data-i18n="details">Details</th></tr></thead><tbody id="audit-body"></tbody></table></div>
+        <div class="pager"><button id="audit-prev" data-i18n="previous">Previous</button><span id="audit-page"></span><button id="audit-next" data-i18n="next">Next</button></div>
       </section>
       <section id="manager-view" hidden>
-        <div class="section-heading"><div><h2>Manager updates</h2><p>Clean fast-forward releases for this control plane.</p></div></div>
+        <div class="section-heading"><div><h2 data-i18n="managerUpdates">Manager updates</h2><p data-i18n="managerUpdatesDescription">Clean fast-forward releases for this control plane.</p></div></div>
         <div class="panel manager-update-panel">
-          <div class="facts"><div class="fact"><span>Installed</span><strong id="manager-current-version">Unknown</strong></div><div class="fact"><span>Available</span><strong id="manager-remote-version">Unknown</strong></div></div>
-          <p id="manager-update-status">Check for updates to read the configured Git upstream.</p>
+          <div class="facts"><div class="fact"><span data-i18n="installed">Installed</span><strong id="manager-current-version" data-i18n-initial="unknown">Unknown</strong></div><div class="fact"><span data-i18n="available">Available</span><strong id="manager-remote-version" data-i18n-initial="unknown">Unknown</strong></div></div>
+          <p id="manager-update-status" data-i18n-initial="checkUpdatesPrompt">Check for updates to read the configured Git upstream.</p>
           <p id="manager-latest-commit" class="node-url"></p>
-          <div class="actions"><button id="manager-check-update">Check for updates</button><button id="manager-install-update" class="primary" disabled>Update now</button></div>
+          <div class="actions"><button id="manager-check-update" data-i18n="checkForUpdates">Check for updates</button><button id="manager-install-update" class="primary" disabled data-i18n="updateNow">Update now</button></div>
         </div>
       </section>
     </main>
   </div>
   <dialog id="enroll-dialog">
     <form id="enroll-form" class="dialog-form">
-      <div><h2>Add node</h2><p>Use a one-time key created by that node's Local Administrator.</p></div>
-      <label>Node URL<input name="baseUrl" type="url" placeholder="https://towteam.example.com" required></label>
-      <label>Friendly name <span class="optional">Optional</span><input name="name" maxlength="80"></label>
-      <label>Enrollment key<input name="enrollmentKey" autocomplete="off" required></label>
+      <div><h2 data-i18n="addNodeTitle">Add node</h2><p data-i18n="addNodeDescription">Use a one-time key created by that node's Local Administrator.</p></div>
+      <label><span data-i18n="nodeUrl">Node URL</span><input name="baseUrl" type="url" placeholder="https://towteam.example.com" required></label>
+      <label><span><span data-i18n="friendlyName">Friendly name</span> <span class="optional" data-i18n="optional">Optional</span></span><input name="name" maxlength="80"></label>
+      <label><span data-i18n="enrollmentKey">Enrollment key</span><input name="enrollmentKey" autocomplete="off" required></label>
       <p id="enroll-error" class="error"></p>
-      <div class="dialog-actions"><button type="button" id="cancel-enroll">Cancel</button><button class="primary" type="submit">Enroll node</button></div>
+      <div class="dialog-actions"><button type="button" id="cancel-enroll" data-i18n="cancel">Cancel</button><button class="primary" type="submit" data-i18n="enrollNode">Enroll node</button></div>
     </form>
   </dialog>
   <div id="toast" role="status"></div>
-  <script src="/app.js" defer></script>
+  <script src="/app.js" type="module"></script>
 </body>
 </html>

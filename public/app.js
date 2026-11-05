@@ -1,5 +1,25 @@
-const state = { nodes: [], nodePage: 1, nodePageSize: 25, nodeTotalPages: 1, nodeTotal: 0, nodeQuery: '', auditPage: 1, auditTotalPages: 1 };
+import { normalizeLanguage, translate } from './i18n.js';
+
+const languageKey = 'towteam-manager-language';
+const state = { nodes: [], nodePage: 1, nodePageSize: 25, nodeTotalPages: 1, nodeTotal: 0, nodeQuery: '', auditPage: 1, auditTotalPages: 1, language: normalizeLanguage(localStorage.getItem(languageKey) || navigator.language?.slice(0, 2)) };
 const $ = selector => document.querySelector(selector);
+const t = (key, values) => translate(state.language, key, values);
+
+function applyLanguage() {
+  document.documentElement.lang = state.language;
+  document.querySelectorAll('[data-i18n]').forEach(node => { node.textContent = t(node.dataset.i18n); });
+  document.querySelectorAll('[data-i18n-initial]:not([data-loaded="true"])').forEach(node => { node.textContent = t(node.dataset.i18nInitial); });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(node => { node.placeholder = t(node.dataset.i18nPlaceholder); });
+  document.querySelectorAll('.language-selector').forEach(select => { select.value = state.language; select.setAttribute('aria-label', t('language')); });
+  if (!$('#nodes-view').hidden) renderNodes();
+  if (!$('#audit-view').hidden && $('#audit-body').children.length) void loadAudit();
+}
+
+function changeLanguage(language) {
+  state.language = normalizeLanguage(language);
+  localStorage.setItem(languageKey, state.language);
+  applyLanguage();
+}
 
 async function api(path, options = {}) {
   const response = await fetch(`/api${path}`, {
@@ -27,22 +47,23 @@ function element(tag, className, text) {
 }
 
 function formatTime(value) {
-  return value ? new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(value)) : 'Never';
+  return value ? new Intl.DateTimeFormat(state.language, { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(value)) : t('never');
 }
 
 function fact(label, value) {
   const item = element('div', 'fact');
-  item.append(element('span', '', label), element('strong', '', value || 'Unknown'));
+  item.append(element('span', '', label), element('strong', '', value || t('unknown')));
   return item;
 }
 
 async function runAction(node, action) {
   const destructive = action === 'install-update' || action === 'restart';
-  if (destructive && !confirm(`${action === 'restart' ? 'Restart' : 'Update'} ${node.name}? Active users may be disconnected.`)) return;
+  if (destructive && !confirm(t('destructiveConfirm', { action: t(action === 'restart' ? 'restart' : 'update'), name: node.name }))) return;
   try {
-    toast(`${action.replaceAll('-', ' ')} requested for ${node.name}.`);
+    const actionLabel = action === 'install-update' ? t('update') : action === 'check-update' ? t('checkUpdate') : t(action);
+    toast(t('requestedFor', { action: actionLabel, name: node.name }));
     const result = await api(`/nodes/${node.id}/jobs`, { method: 'POST', body: JSON.stringify({ action }) });
-    const detail = result.result?.message || result.result?.filename || result.status || 'Completed';
+    const detail = result.result?.message || result.result?.filename || result.status || t('completed');
     toast(`${node.name}: ${detail}`);
     if (['install-update', 'restart'].includes(action)) setTimeout(() => refreshOne(node.id), 5000);
     else await refreshOne(node.id);
@@ -53,28 +74,29 @@ function renderNodes() {
   const grid = $('#node-grid');
   grid.replaceChildren();
   $('#empty').hidden = state.nodes.length > 0;
-  $('#empty').textContent = state.nodeQuery ? 'No nodes match this search.' : 'No nodes enrolled yet.';
+  $('#empty').textContent = state.nodeQuery ? t('noNodeMatches') : t('noNodes');
   for (const node of state.nodes) {
     const card = element('article', 'panel node-card');
     const head = element('div', 'node-head');
     const title = element('div');
     title.append(element('h3', '', node.name), element('div', 'node-url', node.baseUrl));
-    head.append(title, element('span', `status ${node.status}`, node.status));
+    const statusKey = `status${node.status?.[0]?.toUpperCase() || 'U'}${node.status?.slice(1) || 'nknown'}`;
+    head.append(title, element('span', `status ${node.status}`, t(statusKey)));
     const facts = element('div', 'facts');
-    facts.append(fact('Version', node.version), fact('Release channel', node.releaseChannel), fact('Node ID', node.nodeId?.slice(0, 13)), fact('Last seen', formatTime(node.lastSeenAt)));
+    facts.append(fact(t('version'), node.version), fact(t('releaseChannel'), node.releaseChannel), fact(t('nodeId'), node.nodeId?.slice(0, 13)), fact(t('lastSeen'), formatTime(node.lastSeenAt)));
     const actions = element('div', 'actions');
-    for (const [action, label] of [['check-update', 'Check update'], ['backup', 'Backup'], ['install-update', 'Update'], ['restart', 'Restart']]) {
+    for (const [action, label] of [['check-update', t('checkUpdate')], ['backup', t('backup')], ['install-update', t('update')], ['restart', t('restart')]]) {
       const button = element('button', action === 'install-update' ? 'primary' : '', label);
       button.addEventListener('click', () => runAction(node, action));
       actions.append(button);
     }
-    const refresh = element('button', '', 'Refresh');
+    const refresh = element('button', '', t('refresh'));
     refresh.addEventListener('click', () => refreshOne(node.id));
     actions.append(refresh);
-    const remove = element('button', 'danger', 'Remove');
+    const remove = element('button', 'danger', t('remove'));
     remove.addEventListener('click', async () => {
-      if (!confirm(`Remove ${node.name} from this manager? The credential on the node should also be revoked by its Local Administrator.`)) return;
-      try { await api(`/nodes/${node.id}`, { method: 'DELETE' }); await loadNodes(state.nodePage); toast(`${node.name} removed.`); }
+      if (!confirm(t('removeConfirm', { name: node.name }))) return;
+      try { await api(`/nodes/${node.id}`, { method: 'DELETE' }); await loadNodes(state.nodePage); toast(t('removed', { name: node.name })); }
       catch (error) { toast(error.message, true); }
     });
     actions.append(remove);
@@ -83,7 +105,7 @@ function renderNodes() {
     card.append(actions);
     grid.append(card);
   }
-  $('#node-page').textContent = `${state.nodeTotal} node${state.nodeTotal === 1 ? '' : 's'} · Page ${state.nodePage} of ${state.nodeTotalPages}`;
+  $('#node-page').textContent = `${state.nodeTotal} ${t(state.nodeTotal === 1 ? 'nodeSingular' : 'nodePlural')} · ${t('page')} ${state.nodePage} ${t('of')} ${state.nodeTotalPages}`;
   $('#node-prev').disabled = state.nodePage <= 1;
   $('#node-next').disabled = state.nodePage >= state.nodeTotalPages;
 }
@@ -118,10 +140,10 @@ async function loadAudit() {
     const row = document.createElement('tr');
     const details = document.createElement('pre');
     details.textContent = JSON.stringify(log.details || {});
-    for (const value of [formatTime(log.createdAt), log.username || 'System', log.nodeName || '-', log.action]) row.append(element('td', '', value));
+    for (const value of [formatTime(log.createdAt), log.username || t('system'), log.nodeName || '-', log.action]) row.append(element('td', '', value));
     const detailsCell = document.createElement('td'); detailsCell.append(details); row.append(detailsCell); body.append(row);
   }
-  $('#audit-page').textContent = `Page ${result.page} of ${result.totalPages}`;
+  $('#audit-page').textContent = `${t('page')} ${result.page} ${t('of')} ${result.totalPages}`;
   $('#audit-prev').disabled = result.page <= 1;
   $('#audit-next').disabled = result.page >= result.totalPages;
 }
@@ -132,22 +154,26 @@ async function loadManagerUpdate() {
   check.disabled = true; install.disabled = true;
   try {
     const status = await api('/updates');
-    $('#manager-current-version').textContent = status.currentVersion || 'Unknown';
-    $('#manager-remote-version').textContent = status.remoteVersion || 'Unknown';
+    $('#manager-current-version').dataset.loaded = 'true';
+    $('#manager-remote-version').dataset.loaded = 'true';
+    $('#manager-update-status').dataset.loaded = 'true';
+    $('#manager-current-version').textContent = status.currentVersion || t('unknown');
+    $('#manager-remote-version').textContent = status.remoteVersion || t('unknown');
     $('#manager-update-status').textContent = status.message;
     $('#manager-latest-commit').textContent = status.latestCommit || '';
     install.disabled = !status.canUpdate;
   } catch (error) {
+    $('#manager-update-status').dataset.loaded = 'true';
     $('#manager-update-status').textContent = error.message;
   } finally { check.disabled = false; }
 }
 
 async function installManagerUpdate() {
-  if (!confirm('Update TowTeam Manager now? The manager will restart and this page will briefly disconnect.')) return;
+  if (!confirm(t('updateManagerConfirm'))) return;
   const button = $('#manager-install-update'); button.disabled = true;
   try {
     const result = await api('/updates/install', { method: 'POST', body: '{}' });
-    $('#manager-update-status').textContent = result.updated ? 'Update installed. Waiting for the manager to restart...' : 'No update installed.';
+    $('#manager-update-status').textContent = result.updated ? t('updateInstalled') : t('noUpdateInstalled');
     setTimeout(() => location.reload(), 6000);
   } catch (error) { $('#manager-update-status').textContent = error.message; }
 }
@@ -157,10 +183,10 @@ function showBulkProgress(job) {
   const panel = $('#bulk-progress');
   panel.hidden = false;
   const finished = ['completed', 'completed_with_errors', 'failed', 'interrupted'].includes(job.status);
-  const failures = job.failures?.length ? ` Failed: ${job.failures.map(item => item.nodeName).join(', ')}.` : '';
+  const failures = job.failures?.length ? ` ${t('failedNodes', { names: job.failures.map(item => item.nodeName).join(', ') })}` : '';
   panel.textContent = finished
-    ? `Update all finished: ${job.succeeded} succeeded, ${job.failed} failed out of ${job.total}.${failures}`
-    : `Updating all nodes: ${job.completed} of ${job.total} finished (${job.succeeded} succeeded, ${job.failed} failed).`;
+    ? `${t('bulkFinished', job)}${failures}`
+    : t('bulkRunning', job);
   $('#bulk-update').disabled = !finished;
   return finished;
 }
@@ -176,7 +202,7 @@ async function pollBulkJob(jobId) {
     bulkPollTimer = setTimeout(() => pollBulkJob(jobId), 1500);
   } catch (error) {
     $('#bulk-progress').hidden = false;
-    $('#bulk-progress').textContent = `Unable to read bulk update progress: ${error.message}`;
+    $('#bulk-progress').textContent = t('bulkReadError', { message: error.message });
     $('#bulk-update').disabled = false;
   }
 }
@@ -189,7 +215,7 @@ async function resumeBulkJob() {
 }
 
 async function startBulkUpdate() {
-  if (!confirm('Update every enrolled node? This ignores the current search and may temporarily disconnect active users at each station.')) return;
+  if (!confirm(t('bulkConfirm'))) return;
   const button = $('#bulk-update'); button.disabled = true;
   try {
     const job = await api('/nodes/bulk-update', { method: 'POST', body: '{}' });
@@ -236,7 +262,7 @@ $('#enroll-form').addEventListener('submit', async event => {
   const submit = form.querySelector('[type=submit]'); submit.disabled = true;
   try {
     await api('/nodes/enroll', { method: 'POST', body: JSON.stringify(Object.fromEntries(new FormData(form))) });
-    form.reset(); $('#enroll-dialog').close(); state.nodeQuery = ''; $('#node-search').value = ''; await loadNodes(1); toast('Node enrolled.');
+    form.reset(); $('#enroll-dialog').close(); state.nodeQuery = ''; $('#node-search').value = ''; await loadNodes(1); toast(t('nodeEnrolled'));
   } catch (error) { $('#enroll-error').textContent = error.message; }
   finally { submit.disabled = false; }
 });
@@ -272,4 +298,6 @@ $('#node-prev').addEventListener('click', () => loadNodes(state.nodePage - 1).ca
 $('#node-next').addEventListener('click', () => loadNodes(state.nodePage + 1).catch(error => toast(error.message, true)));
 $('#manager-check-update').addEventListener('click', loadManagerUpdate);
 $('#manager-install-update').addEventListener('click', installManagerUpdate);
+document.querySelectorAll('.language-selector').forEach(select => select.addEventListener('change', event => changeLanguage(event.target.value)));
+applyLanguage();
 start();
