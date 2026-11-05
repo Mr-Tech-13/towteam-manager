@@ -23,7 +23,7 @@ services:
       - towteam_manager_data:/app/data
     command: >-
       sh -c "apt-get update
-      && apt-get install -y --no-install-recommends build-essential git python3
+      && apt-get install -y --no-install-recommends build-essential ca-certificates git python3
       && rm -rf /var/lib/apt/lists/*
       && npm ci --omit=dev
       && npm run start"

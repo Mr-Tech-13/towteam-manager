@@ -50,7 +50,8 @@ proxy. Compose stores the database and generated secrets in the
 `towteam_manager_node_modules`. The source checkout is mounted at `/app` so a
 clean fast-forward self-update can modify the checkout before Compose restarts it.
 Compose installs Python and the native compiler toolchain before `npm ci` so
-`better-sqlite3` can build when a precompiled binary is unavailable.
+`better-sqlite3` can build when a precompiled binary is unavailable. It also
+installs the system CA bundle required for verified GitHub HTTPS connections.
 
 The native `./data` directory and Docker named volume are separate manager
 installations. Nodes enrolled during native testing do not automatically appear
