@@ -1,0 +1,28 @@
+services:
+  towteam-manager:
+    image: node:24-bookworm-slim
+    container_name: towteam-manager
+    working_dir: /app
+    restart: unless-stopped
+    ports:
+      - "8090:8090"
+    env_file:
+      - .env
+    environment:
+      PORT: 8090
+      HOST: 0.0.0.0
+      DATABASE_URL: /app/data/manager.sqlite
+      NODE_ENV: production
+      MANAGER_UPDATE_ENABLED: "true"
+      GIT_CONFIG_COUNT: "1"
+      GIT_CONFIG_KEY_0: safe.directory
+      GIT_CONFIG_VALUE_0: /app
+    volumes:
+      - .:/app
+      - towteam_manager_node_modules:/app/node_modules
+      - towteam_manager_data:/app/data
+    command: sh -c "apt-get update && apt-get install -y --no-install-recommends git && npm ci --omit=dev && npm run start"
+
+volumes:
+  towteam_manager_node_modules:
+  towteam_manager_data:

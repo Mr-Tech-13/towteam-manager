@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="dark">
+  <title>TowTeam Manager</title>
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/utilities.css">
+</head>
+<body>
+  <main id="login" class="login-shell">
+    <form id="login-form" class="panel login-panel">
+      <div class="brand"><span></span><div><h1>TowTeam Manager</h1><p>Node control plane <span class="version-label"></span></p></div></div>
+      <label>Username<input name="username" autocomplete="username" required></label>
+      <label>Password<input name="password" type="password" autocomplete="current-password" required></label>
+      <button class="primary" type="submit">Sign in</button>
+      <p class="login-hint">First run: the generated password is saved in <code>data/initial-admin-password.txt</code>.</p>
+      <p id="login-error" class="error"></p>
+    </form>
+  </main>
+  <div id="app" hidden>
+    <header><div class="brand"><span></span><div><h1 id="manager-name">TowTeam Manager</h1><p>Managed nodes <span class="version-label"></span></p></div></div><div class="header-actions"><button id="bulk-update">Update all nodes</button><button id="refresh-all">Refresh page</button><button id="logout">Sign out</button></div></header>
+    <nav><button class="tab active" data-view="nodes">Nodes</button><button class="tab" data-view="audit">Audit</button><button class="tab" data-view="manager">Manager</button></nav>
+    <main class="content">
+      <section id="nodes-view">
+        <div class="section-heading"><div><h2>Nodes</h2><p>Enroll and operate independent TowTeam stations.</p></div><button id="show-enroll" class="primary">+ Add node</button></div>
+        <div class="node-search-bar"><label>Search nodes<input id="node-search" type="search" placeholder="Name, URL, UUID, version, channel, or status" autocomplete="off"></label><label>Per page<select id="node-page-size"><option>10</option><option selected>25</option><option>50</option><option>100</option></select></label></div>
+        <div id="bulk-progress" class="panel bulk-progress" hidden></div>
+        <div id="node-grid" class="node-grid"></div>
+        <div id="empty" class="panel empty" hidden>No nodes enrolled yet.</div>
+        <div class="pager"><button id="node-prev">Previous</button><span id="node-page"></span><button id="node-next">Next</button></div>
+      </section>
+      <section id="audit-view" hidden>
+        <div class="section-heading"><div><h2>Management audit</h2><p>Enrollment, health, and command activity.</p></div><select id="audit-size"><option>10</option><option selected>25</option><option>50</option><option>100</option></select></div>
+        <div class="panel table-wrap"><table><thead><tr><th>Time</th><th>User</th><th>Node</th><th>Action</th><th>Details</th></tr></thead><tbody id="audit-body"></tbody></table></div>
+        <div class="pager"><button id="audit-prev">Previous</button><span id="audit-page"></span><button id="audit-next">Next</button></div>
+      </section>
+      <section id="manager-view" hidden>
+        <div class="section-heading"><div><h2>Manager updates</h2><p>Clean fast-forward releases for this control plane.</p></div></div>
+        <div class="panel manager-update-panel">
+          <div class="facts"><div class="fact"><span>Installed</span><strong id="manager-current-version">Unknown</strong></div><div class="fact"><span>Available</span><strong id="manager-remote-version">Unknown</strong></div></div>
+          <p id="manager-update-status">Check for updates to read the configured Git upstream.</p>
+          <p id="manager-latest-commit" class="node-url"></p>
+          <div class="actions"><button id="manager-check-update">Check for updates</button><button id="manager-install-update" class="primary" disabled>Update now</button></div>
+        </div>
+      </section>
+    </main>
+  </div>
+  <dialog id="enroll-dialog">
+    <form id="enroll-form" class="dialog-form">
+      <div><h2>Add node</h2><p>Use a one-time key created by that node's Local Administrator.</p></div>
+      <label>Node URL<input name="baseUrl" type="url" placeholder="https://towteam.example.com" required></label>
+      <label>Friendly name <span class="optional">Optional</span><input name="name" maxlength="80"></label>
+      <label>Enrollment key<input name="enrollmentKey" autocomplete="off" required></label>
+      <p id="enroll-error" class="error"></p>
+      <div class="dialog-actions"><button type="button" id="cancel-enroll">Cancel</button><button class="primary" type="submit">Enroll node</button></div>
+    </form>
+  </dialog>
+  <div id="toast" role="status"></div>
+  <script src="/app.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,52 @@
+[hidden] {
+  display: none !important;
+}
+
+.login-hint {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.login-hint code {
+  color: #cbd6e5;
+  overflow-wrap: anywhere;
+}
+
+.version-label {
+  color: #7f91aa;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.manager-update-panel {
+  max-width: 720px;
+  padding: 20px;
+  display: grid;
+  gap: 16px;
+}
+
+.manager-update-panel p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.node-search-bar {
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) 110px;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.bulk-progress {
+  margin-bottom: 16px;
+  padding: 14px 16px;
+  border-color: var(--blue);
+  color: #dbe8f8;
+}
+
+@media (max-width: 600px) {
+  .node-search-bar {
+    grid-template-columns: 1fr;
+  }
+}

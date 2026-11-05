@@ -1,0 +1,73 @@
+# Dependencies and package-manager caches
+node_modules/
+.npm/
+.pnpm-store/
+
+# Build, coverage, and test output
+dist/
+build/
+coverage/
+.nyc_output/
+test-results/
+playwright-report/
+.cache/
+.eslintcache
+
+# Runtime data, databases, and generated backups
+data/
+backups/
+tmp/
+temp/
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+*.sqlite-journal
+*.db
+*.db-shm
+*.db-wal
+*.db-journal
+*.backup
+
+# Environment files and generated credentials
+.env
+.env.*
+!.env.example
+initial-admin-password.txt
+manager-secret.key
+secrets/
+*.key
+*.pem
+*.crt
+*.cer
+*.p12
+*.pfx
+*.jks
+*.keystore
+id_rsa*
+id_ed25519*
+
+# Local Docker overrides
+docker-compose.override.yml
+compose.override.yml
+
+# Logs and process state
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+*.pid
+*.pid.lock
+
+# Editors and local tooling
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Operating-system metadata
+.DS_Store
+._*
+Thumbs.db
+Desktop.ini
