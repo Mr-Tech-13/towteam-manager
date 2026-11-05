@@ -21,7 +21,12 @@ services:
       - .:/app
       - towteam_manager_node_modules:/app/node_modules
       - towteam_manager_data:/app/data
-    command: sh -c "apt-get update && apt-get install -y --no-install-recommends git && npm ci --omit=dev && npm run start"
+    command: >-
+      sh -c "apt-get update
+      && apt-get install -y --no-install-recommends build-essential git python3
+      && rm -rf /var/lib/apt/lists/*
+      && npm ci --omit=dev
+      && npm run start"
 
 volumes:
   towteam_manager_node_modules:
